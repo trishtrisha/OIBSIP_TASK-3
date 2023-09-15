@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image:url(lists.jpg);
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fff;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <form id="taskForm">
+            <input type="text" id="newTask" placeholder="Add a new task" required>
+            <input type="datetime-local" id="taskDateTime">
+            <button type="submit">Add</button>
+        </form>
+        <div id="pendingTasks">
+            <h2>Pending Tasks</h2>
+            <ul id="taskList">
+                <!-- Task items will be added here dynamically -->
+            </ul>
+        </div>
+        <div id="completedTasks">
+            <h2>Completed Tasks</h2>
+            <ul id="completedList">
+                <!-- Completed task items will be added here dynamically -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const taskForm = document.getElementById("taskForm");
+        const newTaskInput = document.getElementById("newTask");
+        const taskDateTimeInput = document.getElementById("taskDateTime");
+        const taskList = document.getElementById("taskList");
+        const completedList = document.getElementById("completedList");
+        function createTaskItem(taskText, taskDateTime) {
+            const listItem = document.createElement("li");
+            const taskItem = document.createElement("div");
+            taskItem.classList.add("task");
+            const taskLabel = document.createElement("label");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            const taskTextElement = document.createElement("span");
+            taskTextElement.textContent = taskText;
+            if (taskDateTime) {
+                const dateTimeElement = document.createElement("span");
+                dateTimeElement.textContent = ` (Due: ${new Date(taskDateTime).toLocaleString()})`;
+                taskTextElement.appendChild(dateTimeElement);
+            }
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            taskLabel.appendChild(checkbox);
+            taskLabel.appendChild(taskTextElement);
+            taskItem.appendChild(taskLabel);
+            taskItem.appendChild(editButton);
+            taskItem.appendChild(deleteButton);
+            listItem.appendChild(taskItem);
+            return listItem;
+        }
+        function addTask(event) {
+            event.preventDefault();
+            const taskText = newTaskInput.value.trim();
+            const taskDateTime = taskDateTimeInput.value;
+
+            if (taskText === "") {
+                return;
+            }
+            const listItem = createTaskItem(taskText, taskDateTime);
+            taskList.appendChild(listItem);
+            newTaskInput.value = "";
+            taskDateTimeInput.value = "";
+            attachTaskItemEvents(listItem);
+        }
+        function completeTask(event) {
+            const listItem = event.target.closest("li");
+            if (listItem) {
+                listItem.classList.toggle("completed");
+                if (listItem.classList.contains("completed")) {
+                    completedList.appendChild(listItem);
+                } else {
+                    taskList.appendChild(listItem);
+                }
+            }
+        }
+        function editTask(event) {
+            const listItem = event.target.closest("li");
+            if (listItem) {
+                const taskLabel = listItem.querySelector("label");
+                const taskTextElement = taskLabel.querySelector("span");
+                const newText = prompt("Edit task:", taskTextElement.textContent);
+                if (newText !== null) {
+                    taskTextElement.textContent = newText;
+                }
+            }
+        }
+        function deleteTask(event) {
+            const listItem = event.target.closest("li");
+            if (listItem) {
+                listItem.remove();
+            }
+        }
+        function attachTaskItemEvents(listItem) {
+            const editButton = listItem.querySelector("button:nth-of-type(1)");
+            const deleteButton = listItem.querySelector("button:nth-of-type(2)");
+            editButton.addEventListener("click", editTask);
+            deleteButton.addEventListener("click", deleteTask);
+        }
+         taskForm.addEventListener("submit", addTask);
+         taskList.addEventListener("change", completeTask);
+        completedList.addEventListener("change", completeTask);
+        taskList.querySelectorAll("li").forEach(attachTaskItemEvents);
+        completedList.querySelectorAll("li").forEach(attachTaskItemEvents);
+    </script>
+</body>
+</html>
